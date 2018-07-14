@@ -1,0 +1,77 @@
+from selenium import webdriver
+from bs4 import BeautifulSoup
+from selenium.webdriver.common.keys import Keys
+import time
+
+
+user = "joaobarroskmb@gmail.com"
+pwd = "joaobarros123"
+
+
+site = "https://www.facebook.com/groups/156386671699765/"
+#site = "https://www.facebook.com/groups/Playtheark/"
+#site = "https://www.facebook.com/groups/AmongGamers/"
+#site = "https://www.facebook.com/groups/259447947897427/?ref=group_browse_new"
+#site = "https://www.facebook.com/groups/ahoradomedo/?ref=group_browse_new"
+#site = "https://www.facebook.com/groups/223697648036092/?ref=group_browse_new"
+#site = "https://www.facebook.com/groups/156386671699765/?ref=group_browse_new"
+
+
+chrome_options = webdriver.ChromeOptions()
+prefs = {"profile.default_content_setting_values.notifications": 2}
+chrome_options.add_experimental_option("prefs", prefs)
+driver = webdriver.Chrome(chrome_options=chrome_options, executable_path=r"C:\Users\Erick Pimentel\PycharmProjects\DataMining\webdrivers/chromedriver.exe")
+driver.get('https://pt-br.facebook.com/')
+
+try:
+    username_box = driver.find_element_by_id('email')
+    username_box.send_keys(user)
+
+    password_box = driver.find_element_by_id('pass')
+    password_box.send_keys(pwd)
+
+    loguin_btn = driver.find_element_by_id('loginbutton')
+    loguin_btn.submit()
+except:
+    pass
+
+driver.get(site)
+
+
+
+codigofonte = BeautifulSoup(driver.page_source, 'html.parser')
+qtdmembrossujo = (codigofonte.select("span#count_text")[0].contents)
+qtdmembrossujo = qtdmembrossujo[0]
+limpadorqtdmembros = qtdmembrossujo.find("membros")
+if "." in qtdmembrossujo:
+    qtdmembroslimpo = int(qtdmembrossujo[:limpadorqtdmembros-1].replace(".",""))
+else:
+    qtdmembroslimpo = int(qtdmembrossujo[:limpadorqtdmembros-1])
+
+id = site[32:]
+barra = id.find("/")
+id = id[:barra]
+
+
+paginamembros = 'https://www.facebook.com/groups/'+id+'/members/'
+driver.get(paginamembros)
+
+
+numeropagedown = int(qtdmembroslimpo)
+contadorend = 0
+while True:
+    driver.find_element_by_tag_name('html').send_keys(Keys.END)
+    time.sleep(0.1) #se der problema para pegar os links, eh para mudar aqui
+    contadorend += 1
+    print(contadorend)
+    if contadorend == numeropagedown:
+        break
+
+
+arq = open("Primeira Parte Projeto.txt", "w")
+soup = BeautifulSoup(driver.page_source, 'html.parser')
+for link in soup.find_all('a' , '_60rg'):
+    print(link.get('href'))
+    arq.write(link.get('href'))
+    arq.write('\n')
+driver.close()
