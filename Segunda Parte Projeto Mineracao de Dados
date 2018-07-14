@@ -1,0 +1,129 @@
+def conversordata(data):
+    data.split()
+
+    dia = data[0] + data[1]
+    if data[1] == ' ':
+        dia = '0' + data[0]
+
+    if 'janeiro' in data:
+        mes = '01'
+    elif 'fevereiro' in data:
+        mes = '02'
+    elif 'março' in data:
+        mes = '03'
+    elif 'abril' in data:
+        mes = '04'
+    elif 'maio' in data:
+        mes = '05'
+    elif 'junho' in data:
+        mes = '06'
+    elif 'julho' in data:
+        mes = '07'
+    elif 'agosto' in data:
+        mes = '08'
+    elif 'setembro' in data:
+        mes = '09'
+    elif 'outubro' in data:
+        mes = '10'
+    elif 'novembro' in data:
+        mes = '11'
+    elif 'dezembro' in data:
+        mes = '12'
+
+    ano = data[-4] + data[-3] + data[-2] + data[-1]
+
+    try:
+        ano = int(ano)
+    except ValueError:
+        ano = 0
+
+    if ano == 0:
+        pass
+    else:
+        dataok = "{}-{}-{}".format(dia, mes, ano)
+        return dataok
+
+def abrirbatepapo():
+    actions = ActionChains(driver)
+    loguin_btn = driver.find_element_by_css_selector("#BuddylistPagelet div.uiToggle a.fbNubButton")
+    loguin_btn.click()
+    loguin_btn = driver.find_element_by_css_selector("#BuddylistPagelet div.uiToggle ul li._42fz a._55ln")
+    loguin_btn.click()
+
+def abrirpaginainicial():
+    driver.get('https://pt-br.facebook.com/')
+
+def abrirmessenger():
+    driver.get("https://www.facebook.com/messages/t/")
+
+
+from selenium import webdriver
+from bs4 import BeautifulSoup
+import time
+from random import randint
+from selenium.webdriver.common.action_chains import ActionChains
+
+
+user = "mariabarroshehe@hotmail.com"
+pwd = "mariabarros123"
+
+chrome_options = webdriver.ChromeOptions()
+prefs = {"profile.default_content_setting_values.notifications": 2}
+chrome_options.add_experimental_option("prefs", prefs)
+driver = webdriver.Chrome(chrome_options=chrome_options, executable_path=r"C:\Users\Erick Pimentel\PycharmProjects\DataMining\webdrivers/chromedriver.exe")
+driver.maximize_window()
+driver.get('https://pt-br.facebook.com/')
+
+username_box = driver.find_element_by_id('email')
+username_box.send_keys(user)
+
+password_box = driver.find_element_by_id('pass')
+password_box.send_keys(pwd)
+
+loguin_btn = driver.find_element_by_id('loginbutton')
+loguin_btn.submit()
+
+arquivo = open("Primeira Parte Projeto.txt", "r")
+listalinks = arquivo.readlines()
+qtdlinks = (len(listalinks))
+
+arq = open("Segunda Parte Projeto.txt", "w")
+for x in range(0 , qtdlinks):
+    rantime = randint(0, 5)
+    time.sleep(rantime)
+    if rantime == 0:
+        abrirbatepapo()
+        time.sleep(1)
+    if rantime == 1:
+        abrirpaginainicial()
+        time.sleep(1)
+    if rantime == 2:
+        abrirmessenger()
+        time.sleep(1)
+
+    driver.get(listalinks[x])
+
+    count = 0
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    for i in soup.find_all('a' , '_6-6'):
+        count += 1
+        if count == 2:
+            sobre = i.get('href')
+
+    infobasicasdecontato = sobre+"&section=contact-info"
+    driver.get(infobasicasdecontato)
+
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    query = soup.find_all('li' , class_= '_3pw9')
+
+    for li in query:
+        item = li.select('._50f4')
+        item = str(item)
+        if 'Data de nascimento' in item:
+            data = li.select('._2iem')[0].contents[0]
+            if conversordata(data) == None:
+                pass
+            else:
+                print(conversordata(data))
+                arq.write(conversordata(data))
+                arq.write('\n')
